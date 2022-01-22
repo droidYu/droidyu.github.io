@@ -28,24 +28,6 @@
     <priority>0.6</priority>
   </url>
   
-  <url>
-    <loc>https://droidyu.github.io/2022/01/21/hello-world/</loc>
-    
-    <lastmod>2022-01-21</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://droidyu.github.io/2014/01/21/FirstBlog/</loc>
-    
-    <lastmod>2021-01-21</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
 
   <url>
     <loc>https://droidyu.github.io/</loc>
@@ -55,41 +37,6 @@
   </url>
 
   
-  <url>
-    <loc>https://droidyu.github.io/tags/Flutter/</loc>
-    <lastmod>2022-01-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://droidyu.github.io/tags/State/</loc>
-    <lastmod>2022-01-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
 
-  
-  <url>
-    <loc>https://droidyu.github.io/categories/Android/</loc>
-    <lastmod>2022-01-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://droidyu.github.io/categories/Android/Network/</loc>
-    <lastmod>2022-01-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://droidyu.github.io/categories/Android/OKHttp/</loc>
-    <lastmod>2022-01-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
   
 </urlset>
