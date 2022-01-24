@@ -4,13 +4,54 @@
   
     
     <entry>
-      <title>Hello World</title>
-      <link href="/2022/01/21/hello-world/"/>
-      <url>/2022/01/21/hello-world/</url>
+      <title>【学习笔记】《第一行代码(第3版)》(Kotlin部分)</title>
+      <link href="/notes/note2/"/>
+      <url>/notes/note2/</url>
       
-        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
+        <content type="html"><![CDATA[]]></content>
       
       
+      <categories>
+          
+          <category> 学习笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 学习笔记 </tag>
+            
+            <tag> 《第一行代码(第3版)》 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>【学习笔记】之《第一行代码(第3版)》(Android部分)</title>
+      <link href="/notes/note1/"/>
+      <url>/notes/note1/</url>
+      
+        <content type="html"><![CDATA[<h1 id="第一章-启程"><a href="#第一章-启程" class="headerlink" title="第一章 启程"></a>第一章 启程</h1><h2 id="Android系统架构"><a href="#Android系统架构" class="headerlink" title="Android系统架构"></a>Android系统架构</h2><p><img src="https://pic.imgdb.cn/item/61ed33632ab3f51d9139a269.png"></p><h3 id="应用层"><a href="#应用层" class="headerlink" title="应用层"></a>应用层</h3><p>所有安装在手机上的应用程序都是属于这一层，比如系统自带的联系人、短信等程序。</p><h3 id="应用框架层"><a href="#应用框架层" class="headerlink" title="应用框架层"></a>应用框架层</h3><p>这一层主要提供了构建应用程序时可能用到的各种API，Android自带的一些核心应用就是使用这些API完成的，开发者也可以通过使用这些API来构建自己的应用程序。</p><h3 id="系统运行库层"><a href="#系统运行库层" class="headerlink" title="系统运行库层"></a>系统运行库层</h3><p>这一层通过一些C/C++库来为Android系统提供了主要的特性支持。在这一层还包括Android运行时库和Dalvik虚拟机（5.0系统之后改为ART），它使得每个Android应用都能运行在独立的进程中，并拥有一个自己的虚拟机实例。<br>相较于JVM，Dalvik和ART是专门为移动设备定制的，它针对手机内存、CPU性能有限等情况做了优化处理。</p><h3 id="Linux内核层"><a href="#Linux内核层" class="headerlink" title="Linux内核层"></a>Linux内核层</h3><p>Android系统是基于Linux内核的，这一层为Android设备的各种硬件提供了底层的驱动，如显示驱动、音频驱动、照相机驱动、蓝牙驱动、Wi-Fi驱动、电源管理等。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 学习笔记 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 学习笔记 </tag>
+            
+            <tag> 《第一行代码(第3版)》 </tag>
+            
+        </tags>
       
     </entry>
     
