@@ -4,31 +4,6 @@
   
     
     <entry>
-      <title>View体系（二）View的六种滑动方式</title>
-      <link href="/android/view/2-scroll/"/>
-      <url>/android/view/2-scroll/</url>
-      
-        <content type="html"><![CDATA[<h1 id="layout-方法"><a href="#layout-方法" class="headerlink" title="layout()方法"></a>layout()方法</h1><h1 id="offsetLeftAndRight-与offsetTopAndBottom"><a href="#offsetLeftAndRight-与offsetTopAndBottom" class="headerlink" title="offsetLeftAndRight()与offsetTopAndBottom()"></a>offsetLeftAndRight()与offsetTopAndBottom()</h1><h1 id="LayoutParams"><a href="#LayoutParams" class="headerlink" title="LayoutParams"></a>LayoutParams</h1><h1 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h1><h1 id="scrollTo与scrollBy"><a href="#scrollTo与scrollBy" class="headerlink" title="scrollTo与scrollBy"></a>scrollTo与scrollBy</h1><h1 id="Scroller"><a href="#Scroller" class="headerlink" title="Scroller"></a>Scroller</h1>]]></content>
-      
-      
-      <categories>
-          
-          <category> View体系 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> View体系 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>View体系（一）基础知识</title>
       <link href="/android/view/1-basic/"/>
       <url>/android/view/1-basic/</url>
