@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>View体系（四）深入理解事件分发机制</title>
+      <link href="/android/view/4-event-2/"/>
+      <url>/android/view/4-event-2/</url>
+      
+        <content type="html"><![CDATA[<p>上篇文章<a href="https://droidyu.github.io/android/view/3-event/">《View体系（三）初探View事件分发机制》</a>对View的事件分发机制进行了粗略的讲解，并用代码实际探究了View事件的传递和处理过程。这篇文章就对View的事件分发机制进行一个更深入的讲解。<br>之前提到过事件分发机制中的三个方法：<code>dispatchTouchEvent(MotionEvent event)</code>、<code>onInterceptTouchEvent(MotionEvent ev)</code>和<code>onTouchEvent(MotionEvent event)</code>，那么这三个方法到底有什么样的关联呢？他们的关系其实可以用如下的伪代码表示：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">dispatchTouchEvent</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> result = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (onInterceptTouchEvent(event)) &#123;</span><br><span class="line">        result = onTouchEvent(event);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        result = child.dispatchTouchEvent(event);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h1 id="事件由上到下的传递规则"><a href="#事件由上到下的传递规则" class="headerlink" title="事件由上到下的传递规则"></a>事件由上到下的传递规则</h1><p>对于根<code>ViewGroup</code>，事件首先传递给它的<code>dispatchTouchEvent()</code>方法，如果该<code>ViewGroup</code>的<code>onInterceptTouchEvent()</code>方法返回<code>true</code>，则表示它要拦截这个事件，这个事件就会交给它的<code>onTouchEvent()</code>方法处理，如果<code>onInterceptTouchEvent()</code>方法返回<code>false</code>，则表示它不拦截这个事件，则交给它的子元素的<code>dispatchTouchEvent()</code>来处理，如此的反复下去。如果传递给最底层的<code>View</code>，<code>View</code>是没有子<code>View</code>的，就会调用<code>View</code>的<code>dispatchTouchEvent()</code>方法，一般情况下最终会调用<code>View</code>的<code>onTouchEvent()</code>方法。</p><h1 id="事件由下而上的传递规则"><a href="#事件由下而上的传递规则" class="headerlink" title="事件由下而上的传递规则"></a>事件由下而上的传递规则</h1><p>事件传给最底层的<code>View</code>，如果他的<code>onTouchEvent()</code>方法返回<code>true</code>，则事件由最底层的<code>View</code>处理并消耗了，如果返回<code>false</code>则表示该<code>View</code>不消耗此次事件，则继续向上传递给父<code>View</code>的<code>onTouchEvent()</code>处理，如果父<code>View</code>的<code>onTouchEvent()</code>仍旧返回<code>false</code>，则继续向上传递给该父<code>View</code>的父<code>View</code>的<code>onTouchEvent()</code>处理，如此的反复下去。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> View体系 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> View体系 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>View体系（三）初探View事件分发机制</title>
       <link href="/android/view/3-event/"/>
       <url>/android/view/3-event/</url>
