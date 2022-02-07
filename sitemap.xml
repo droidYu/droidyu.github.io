@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://droidyu.github.io/about/index.html</loc>
+    <loc>https://droidyu.github.io/android/view/7-view-MeasureSpec/</loc>
     
     <lastmod>2022-02-07</lastmod>
     
@@ -22,16 +22,7 @@
   <url>
     <loc>https://droidyu.github.io/android/view/5-setContentView/</loc>
     
-    <lastmod>2022-02-06</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://droidyu.github.io/android/view/3-event/</loc>
-    
-    <lastmod>2022-01-29</lastmod>
+    <lastmod>2022-02-07</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -40,7 +31,16 @@
   <url>
     <loc>https://droidyu.github.io/android/view/4-event-2/</loc>
     
-    <lastmod>2022-01-29</lastmod>
+    <lastmod>2022-02-07</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://droidyu.github.io/android/view/3-event/</loc>
+    
+    <lastmod>2022-02-07</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -49,7 +49,7 @@
   <url>
     <loc>https://droidyu.github.io/android/view/2-scroll/</loc>
     
-    <lastmod>2022-01-29</lastmod>
+    <lastmod>2022-02-07</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -58,7 +58,16 @@
   <url>
     <loc>https://droidyu.github.io/android/view/1-basic/</loc>
     
-    <lastmod>2022-01-28</lastmod>
+    <lastmod>2022-02-07</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://droidyu.github.io/about/index.html</loc>
+    
+    <lastmod>2022-02-07</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
