@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>View体系（八）深入剖析View的onMeasure方法 | droidYu</title><meta name="keywords" content="View体系,源码"><meta name="author" content="droidYu"><meta name="copyright" content="droidYu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="之前的文章《View体系（六）View工作流程入口》介绍了View是从什么地方开始它的工作流程的，《View体系（七）理解 MeasureSpec》介绍了View在measure流程时的一个重要参数。有了上两篇的铺垫，我们就来看一下View的onMeasure方法到底做了什么。  （注：文中源码基于 Android 12）  在View做测量时，会调用View的onMeasure方法： 1234p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="View体系（八）深入剖析View的onMeasure方法">
+<meta property="og:url" content="https://droidyu.github.io/android/view/8-view-measure/index.html">
+<meta property="og:site_name" content="droidYu">
+<meta property="og:description" content="之前的文章《View体系（六）View工作流程入口》介绍了View是从什么地方开始它的工作流程的，《View体系（七）理解 MeasureSpec》介绍了View在measure流程时的一个重要参数。有了上两篇的铺垫，我们就来看一下View的onMeasure方法到底做了什么。  （注：文中源码基于 Android 12）  在View做测量时，会调用View的onMeasure方法： 1234p">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.imgdb.cn/item/6204dd1a2ab3f51d914b5b3d.jpg">
+<meta property="article:published_time" content="2022-02-10T08:39:34.000Z">
+<meta property="article:modified_time" content="2022-02-10T09:39:03.197Z">
+<meta property="article:author" content="droidYu">
+<meta property="article:tag" content="View体系">
+<meta property="article:tag" content="源码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.imgdb.cn/item/6204dd1a2ab3f51d914b5b3d.jpg"><link rel="shortcut icon" href="https://pic.imgdb.cn/item/61ed5e7a2ab3f51d916195d7.png"><link rel="canonical" href="https://droidyu.github.io/android/view/8-view-measure/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'View体系（八）深入剖析View的onMeasure方法',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2022-02-10 17:39:03'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.0.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://pic.imgdb.cn/item/61ed09222ab3f51d91123700.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><div class="data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a></div><div class="data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a></div><div class="data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://pic.imgdb.cn/item/6204dd1a2ab3f51d914b5b3d.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">droidYu</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">View体系（八）深入剖析View的onMeasure方法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-02-10T08:39:34.000Z" title="发表于 2022-02-10 16:39:34">2022-02-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-02-10T09:39:03.197Z" title="更新于 2022-02-10 17:39:03">2022-02-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/View%E4%BD%93%E7%B3%BB/">View体系</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">591</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>2分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="View体系（八）深入剖析View的onMeasure方法"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>之前的文章<a href="https://droidyu.github.io/android/view/6-view-work-entrance/">《View体系（六）View工作流程入口》</a>介绍了<code>View</code>是从什么地方开始它的工作流程的，<a href="https://droidyu.github.io/android/view/7-view-MeasureSpec/">《View体系（七）理解 MeasureSpec》</a>介绍了<code>View</code>在<code>measure</code>流程时的一个重要参数。有了上两篇的铺垫，我们就来看一下<code>View</code>的<code>onMeasure</code>方法到底做了什么。</p>
+<blockquote>
+<p><strong>（注：文中源码基于 <code>Android 12</code>）</strong></p>
+</blockquote>
+<p>在<code>View</code>做测量时，会调用<code>View</code>的<code>onMeasure</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</span><br><span class="line">    setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),</span><br><span class="line">            getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里只调用了一个<code>setMeasuredDimension</code>方法，看它的注释：</p>
+<blockquote>
+<p>This method must be called by {@link #onMeasure(int, int)} to store the measured width and measured height. </p>
+</blockquote>
+<p>可以知道，这个方法是用来存储测量的宽度和测量的高度的。</p>
+<p>继续看<code>setMeasuredDimension</code>方法里面调用了<code>getDefaultSize</code>，该方法用于获取<code>View</code>默认的大小：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getDefaultSize</span><span class="params">(<span class="keyword">int</span> size, <span class="keyword">int</span> measureSpec)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> result = size;</span><br><span class="line">    <span class="keyword">int</span> specMode = MeasureSpec.getMode(measureSpec);</span><br><span class="line">    <span class="keyword">int</span> specSize = MeasureSpec.getSize(measureSpec);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (specMode) &#123;</span><br><span class="line">    <span class="keyword">case</span> MeasureSpec.UNSPECIFIED:</span><br><span class="line">        result = size;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> MeasureSpec.AT_MOST:</span><br><span class="line">    <span class="keyword">case</span> MeasureSpec.EXACTLY:</span><br><span class="line">        result = specSize;<span class="comment">//①</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>specMode</code>和<code>specSize</code>之前的文章中讲过，表示测量模式和测量大小。这段代码表示根据不同的<code>specMode</code>来返回不同的<code>result</code>值，即<code>View</code>测量的大小。可以看到注释<code>①</code>处不管是<code>AT_MOST</code>还是<code>EXACTLY</code>，都返回<code>specSize</code>，也就是说，对于一个直接继承自<code>View</code>的自定义<code>View</code>来说，它的<code>wrap_content</code>和<code>match_parent</code>属性的效果是一样的。因此我们自定义<code>View</code>时，如果要使<code>wrap_content</code>属性生效，就必须重写<code>onMeasure</code>方法并根据<code>specMode</code>来返回指定的大小。</p>
+<p>现在我们知道了<code>specSize</code>是测量的大小，那传入的第一个参数<code>size</code>又是个什么？我们看传入的<code>getSuggestedMinimumWidth</code>方法做了什么：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">getSuggestedMinimumWidth</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (mBackground == <span class="keyword">null</span>) ? mMinWidth : max(mMinWidth, mBackground.getMinimumWidth());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里先判断<code>View</code>是否有背景，如果有，就返回背景宽度和<code>View</code>最小宽度中较大的一个；如果没有，就直接返回<code>View</code>的最小宽度，即<code>mMinWidth</code>。默认的<code>mMinWidth</code>为0，对应<code>xml</code>文件中的<code>android:minWidth</code>属性。</p>
+<p>至此，<code>View</code>的<code>onMeasure</code>方法我们就分析完了，其做的工作很简单，就是保存<code>View</code>的测量尺寸。在我们自定义<code>View</code>时，我们根据自己的需求来重写<code>onMeasure</code>方法，并对<code>View</code>的尺寸自己进行测量并调用<code>setMeasuredDimension</code>方法进行保存。</p>
+<blockquote>
+<p><strong>关注我</strong></p>
+<ul>
+<li>掘金：<a target="_blank" rel="noopener" href="https://juejin.cn/user/2365804752143256">droidYu</a></li>
+<li>CSDN：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010444082">droidYu</a></li>
+<li>Github：<a target="_blank" rel="noopener" href="https://github.com/droidYu">droidYu</a></li>
+<li>个人博客：<a href="https://droidyu.github.io/">droidYu</a></li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">droidYu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://droidyu.github.io/android/view/8-view-measure/">https://droidyu.github.io/android/view/8-view-measure/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://droidyu.github.io" target="_blank">droidYu</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/View%E4%BD%93%E7%B3%BB/">View体系</a><a class="post-meta__tags" href="/tags/%E6%BA%90%E7%A0%81/">源码</a></div><div class="post_share"><div class="social-share" data-image="https://pic.imgdb.cn/item/6204dd1a2ab3f51d914b5b3d.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/android/framwork/system-launch/"><img class="next-cover" src="https://pic.imgdb.cn/item/62038ece2ab3f51d91289816.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">浅析Android系统启动过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/android/view/5-setContentView/" title="View体系（五）熟悉又陌生的setContentView"><img class="cover" src="https://pic.imgdb.cn/item/61ffc8c62ab3f51d91e23d17.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-06</div><div class="title">View体系（五）熟悉又陌生的setContentView</div></div></a></div><div><a href="/android/view/6-view-work-entrance/" title="View体系（六）View工作流程入口"><img class="cover" src="https://pic.imgdb.cn/item/6200b1042ab3f51d91a5b2e6.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-07</div><div class="title">View体系（六）View工作流程入口</div></div></a></div><div><a href="/android/view/7-view-MeasureSpec/" title="View体系（七）理解 MeasureSpec"><img class="cover" src="https://pic.imgdb.cn/item/6201b6342ab3f51d9188d660.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-07</div><div class="title">View体系（七）理解 MeasureSpec</div></div></a></div><div><a href="/android/view/1-basic/" title="View体系（一）基础知识"><img class="cover" src="https://pic.imgdb.cn/item/61ef888f2ab3f51d91360947.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-27</div><div class="title">View体系（一）基础知识</div></div></a></div><div><a href="/android/view/3-event/" title="View体系（三）初探View事件分发机制"><img class="cover" src="https://pic.imgdb.cn/item/61f4a3bd2ab3f51d91d97faa.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-28</div><div class="title">View体系（三）初探View事件分发机制</div></div></a></div><div><a href="/android/view/4-event-2/" title="View体系（四）深入理解事件分发机制"><img class="cover" src="https://pic.imgdb.cn/item/61f4abbf2ab3f51d91e13d80.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-29</div><div class="title">View体系（四）深入理解事件分发机制</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://pic.imgdb.cn/item/61ed09222ab3f51d91123700.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">droidYu</div><div class="author-info__description">一条有梦想的咸鱼</div></div><div class="card-info-data is-center"><div class="card-info-data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">9</div></a></div><div class="card-info-data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a></div><div class="card-info-data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/droidYu"><i class="fab fa-github"></i><span>Github</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">我的个人博客正式开通啦！</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/android/view/8-view-measure/" title="View体系（八）深入剖析View的onMeasure方法"><img src="https://pic.imgdb.cn/item/6204dd1a2ab3f51d914b5b3d.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="View体系（八）深入剖析View的onMeasure方法"/></a><div class="content"><a class="title" href="/android/view/8-view-measure/" title="View体系（八）深入剖析View的onMeasure方法">View体系（八）深入剖析View的onMeasure方法</a><time datetime="2022-02-10T08:39:34.000Z" title="发表于 2022-02-10 16:39:34">2022-02-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/android/framwork/system-launch/" title="浅析Android系统启动过程"><img src="https://pic.imgdb.cn/item/62038ece2ab3f51d91289816.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅析Android系统启动过程"/></a><div class="content"><a class="title" href="/android/framwork/system-launch/" title="浅析Android系统启动过程">浅析Android系统启动过程</a><time datetime="2022-02-09T06:50:37.000Z" title="发表于 2022-02-09 14:50:37">2022-02-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/android/view/7-view-MeasureSpec/" title="View体系（七）理解 MeasureSpec"><img src="https://pic.imgdb.cn/item/6201b6342ab3f51d9188d660.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="View体系（七）理解 MeasureSpec"/></a><div class="content"><a class="title" href="/android/view/7-view-MeasureSpec/" title="View体系（七）理解 MeasureSpec">View体系（七）理解 MeasureSpec</a><time datetime="2022-02-07T11:14:25.000Z" title="发表于 2022-02-07 19:14:25">2022-02-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/android/view/6-view-work-entrance/" title="View体系（六）View工作流程入口"><img src="https://pic.imgdb.cn/item/6200b1042ab3f51d91a5b2e6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="View体系（六）View工作流程入口"/></a><div class="content"><a class="title" href="/android/view/6-view-work-entrance/" title="View体系（六）View工作流程入口">View体系（六）View工作流程入口</a><time datetime="2022-02-07T05:37:22.000Z" title="发表于 2022-02-07 13:37:22">2022-02-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/android/view/5-setContentView/" title="View体系（五）熟悉又陌生的setContentView"><img src="https://pic.imgdb.cn/item/61ffc8c62ab3f51d91e23d17.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="View体系（五）熟悉又陌生的setContentView"/></a><div class="content"><a class="title" href="/android/view/5-setContentView/" title="View体系（五）熟悉又陌生的setContentView">View体系（五）熟悉又陌生的setContentView</a><time datetime="2022-02-06T09:06:18.000Z" title="发表于 2022-02-06 17:06:18">2022-02-06</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://pic.imgdb.cn/item/6204dd1a2ab3f51d914b5b3d.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By droidYu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">本地搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="34,98,116" opacity="0.7" zIndex="-1" count="199" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
