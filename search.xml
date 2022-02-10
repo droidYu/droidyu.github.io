@@ -32,15 +32,15 @@
     
     <entry>
       <title>浅析Android系统启动过程</title>
-      <link href="/android/framwork/system-launch/"/>
-      <url>/android/framwork/system-launch/</url>
+      <link href="/android/framework/system-launch/"/>
+      <url>/android/framework/system-launch/</url>
       
         <content type="html"><![CDATA[<p><code>Android</code>系统的启动流程是十分复杂的，但是作为应用层的开发人员来说，了解其大致流程即可。</p><h1 id="启动流程概览"><a href="#启动流程概览" class="headerlink" title="启动流程概览"></a>启动流程概览</h1><p><code>Android</code>系统启动流程大致可以概括为以下的几个步骤：</p><ol><li><p>启动电源及系统启动</p></li><li><p>引导程序<code>BootLoader</code>启动</p></li><li><p><code>Linux</code>内核启动</p></li><li><p><code>init</code>进程启动</p></li><li><p><code>Zygote</code>进程启动</p></li><li><p><code>SystemServer</code>进程启动</p></li><li><p><code>Launcher</code>启动</p></li></ol><h1 id="关键进程"><a href="#关键进程" class="headerlink" title="关键进程"></a>关键进程</h1><p>在介绍启动流程之前，先来了解一下几个关键的进程及其作用：</p><h2 id="init进程"><a href="#init进程" class="headerlink" title="init进程"></a><code>init</code>进程</h2><p><code>init</code>进程是<code>Android</code>系统中用户空间的第一个进程，进程号为<code>1</code>，是<code>Android</code>系统启动流程中的一个关键进程。它被赋予很多重要的工作职责，比如创建<code>Zygote</code>（孵化器）和属性服务等。<br><code>init</code>进程是由多个源文件组成的，这些文件位于源码目录<code>system/core/init</code>中。</p><h2 id="Zygote进程"><a href="#Zygote进程" class="headerlink" title="Zygote进程"></a><code>Zygote</code>进程</h2><p>在<code>Android</code>系统中，<code>DVM</code>和<code>ART</code>、应用程序进程以及运行系统关键服务的<code>SystemServer</code>进程都是由<code>Zygote</code>进程来创建的，我们也可以将其称为孵化器。它通过<code>fork</code>（复制进程）的形式来创建应用程序进程和<code>SystemServer</code>进程。由于<code>Zygote</code>进程在启动时会创建<code>DVM</code>或<code>ART</code>，因此通过<code>fork</code>而创建的应用程序进程和<code>SystemServer</code>进程可以在内部获得一个<code>DVM</code>或<code>ART</code>的实例副本。</p><h2 id="SystemServer进程"><a href="#SystemServer进程" class="headerlink" title="SystemServer进程"></a><code>SystemServer</code>进程</h2><p><code>SystemServer</code>进程主要用于创建系统服务，我们熟悉的<code>AMS</code>、<code>WMS</code>和<code>PMS</code>都是由它来创建的。</p><h2 id="Launcher"><a href="#Launcher" class="headerlink" title="Launcher"></a><code>Launcher</code></h2><p><code>Launcher</code>是一个应用程序，用来显示系统中已经安装的应用程序。<code>Launcher</code>在启动过程中会请求<code>PMS</code>返回系统中已安装的应用程序信息，并将这些信息封装为一个快捷图标列表显示在系统屏幕上，用户可以点击这些图标来启动相应的应用程序。</p><h1 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h1><h2 id="1-启动电源及系统启动"><a href="#1-启动电源及系统启动" class="headerlink" title="1. 启动电源及系统启动"></a>1. 启动电源及系统启动</h2><p>当电源按下时，引导芯片代码从预定义的地方（固化在<code>ROM</code>中）开始执行。这里主要做的是加载引导程序<code>BootLoader</code>到<code>RAM</code>中，然后执行引导程序。</p><h2 id="2-引导程序BootLoader启动"><a href="#2-引导程序BootLoader启动" class="headerlink" title="2. 引导程序BootLoader启动"></a>2. 引导程序<code>BootLoader</code>启动</h2><p>引导程序<code>BootLoader</code>是在<code>Android</code>操作系统开始运行前到一小段程序，它的作用是把系统<code>OS</code>拉起来并运行。</p><h2 id="3-Linux内核启动"><a href="#3-Linux内核启动" class="headerlink" title="3. Linux内核启动"></a>3. <code>Linux</code>内核启动</h2><p>当内核启动时，设置缓存、被保护存储器、计划列表、加载驱动。当<code>Linux</code>内核完成系统设置时，它首先在系统中寻找<code>init.rc</code>文件，并启动<code>init</code>进程。</p><h2 id="4-init进程启动"><a href="#4-init进程启动" class="headerlink" title="4. init进程启动"></a>4. <code>init</code>进程启动</h2><ul><li>创建和挂载启动所需的文件目录</li><li>初始化和启动属性服务</li><li>解析<code>init.rc</code>配置文件</li><li>启动<code>Zygote</code>进程</li></ul><h2 id="5-Zygote进程启动"><a href="#5-Zygote进程启动" class="headerlink" title="5. Zygote进程启动"></a>5. <code>Zygote</code>进程启动</h2><ul><li>创建<code>AppRuntime</code>并调用其<code>start</code>方法，启动<code>Zygote</code>进程</li><li>创建<code>Java</code>虚拟机并为其注册<code>JNI</code>方法</li><li>通过<code>JNI</code>调用<code>ZygoteInit</code>的<code>main</code>函数进入<code>Zygote</code>的<code>Java</code>框架层</li><li>通过<code>registerZygoteSocket</code>方法创建服务端<code>Socket</code>，并通过<code>runSelectLoop</code>方法等待<code>AMS</code>的请求来创建新的应用程序进程。</li></ul><h2 id="6-SystemServer进程启动"><a href="#6-SystemServer进程启动" class="headerlink" title="6. SystemServer进程启动"></a>6. <code>SystemServer</code>进程启动</h2><ul><li>启动<code>Binder</code>线程池，用于后续与其他进程进行通信</li><li>创建<code>SystemServiceManager</code>，用于对系统服务进行创建、启动和管理。</li><li>启动各种系统服务<h2 id="7-Launcher启动"><a href="#7-Launcher启动" class="headerlink" title="7. Launcher启动"></a>7. <code>Launcher</code>启动</h2></li></ul><p>被<code>SystemServer</code>进程启动的AMS会启动<code>Launcher</code>，<code>Launcher</code>启动后会将已安装应用的图标显示到界面上。</p><p>结合上面的流程，给出<code>Android</code>系统启动流程图：<br><img src="https://pic.imgdb.cn/item/62038ad72ab3f51d912547a8.jpg"></p><p>参考资料：《Android进阶解密》</p><blockquote><p><strong>关注我</strong></p><ul><li>掘金：<a href="https://juejin.cn/user/2365804752143256">droidYu</a></li><li>CSDN：<a href="https://blog.csdn.net/u010444082">droidYu</a></li><li>Github：<a href="https://github.com/droidYu">droidYu</a></li><li>个人博客：<a href="https://droidyu.github.io/">droidYu</a></li></ul></blockquote>]]></content>
       
       
       <categories>
           
-          <category> Android Framwork </category>
+          <category> Android Framework </category>
           
       </categories>
       
@@ -49,7 +49,7 @@
             
             <tag> Android系统启动 </tag>
             
-            <tag> Android Framwork </tag>
+            <tag> Android Framework </tag>
             
         </tags>
       

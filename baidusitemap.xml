@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://droidyu.github.io/android/framework/system-launch/</loc>
+    <lastmod>2022-02-10</lastmod>
+  </url>
+  <url>
     <loc>https://droidyu.github.io/android/view/8-view-measure/</loc>
     <lastmod>2022-02-10</lastmod>
   </url>
   <url>
     <loc>https://droidyu.github.io/android/view/7-view-MeasureSpec/</loc>
     <lastmod>2022-02-10</lastmod>
-  </url>
-  <url>
-    <loc>https://droidyu.github.io/android/framwork/system-launch/</loc>
-    <lastmod>2022-02-09</lastmod>
   </url>
   <url>
     <loc>https://droidyu.github.io/android/view/6-view-work-entrance/</loc>
