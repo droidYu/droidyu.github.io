@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>SystemServer 进程启动过程 | droidYu</title><meta name="keywords" content="Android系统启动,Android Framework"><meta name="author" content="droidYu"><meta name="copyright" content="droidYu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="之前的文章《浅析Android系统启动过程》简要讲解了Android系统整体启动过程，今天我们看一下其中一个重要的过程：SystemServer进程是如何启动的。  文中源码基于Android 8.0  上篇文章《Zygote进程启动过程》提到Zygote启动过程中调用了startSystemServer启动SystemServer进程，我们继续跟进里面的代码看SystemServer进程是如何启">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SystemServer 进程启动过程">
+<meta property="og:url" content="https://droidyu.github.io/android/framework/system-server/index.html">
+<meta property="og:site_name" content="droidYu">
+<meta property="og:description" content="之前的文章《浅析Android系统启动过程》简要讲解了Android系统整体启动过程，今天我们看一下其中一个重要的过程：SystemServer进程是如何启动的。  文中源码基于Android 8.0  上篇文章《Zygote进程启动过程》提到Zygote启动过程中调用了startSystemServer启动SystemServer进程，我们继续跟进里面的代码看SystemServer进程是如何启">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.imgdb.cn/item/621b32262ab3f51d9198ff15.jpg">
+<meta property="article:published_time" content="2022-02-27T06:27:32.000Z">
+<meta property="article:modified_time" content="2022-02-27T08:13:32.373Z">
+<meta property="article:author" content="droidYu">
+<meta property="article:tag" content="Android系统启动">
+<meta property="article:tag" content="Android Framework">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.imgdb.cn/item/621b32262ab3f51d9198ff15.jpg"><link rel="shortcut icon" href="https://pic.imgdb.cn/item/61ed5e7a2ab3f51d916195d7.png"><link rel="canonical" href="https://droidyu.github.io/android/framework/system-server/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'SystemServer 进程启动过程',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2022-02-27 16:13:32'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.0.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://pic.imgdb.cn/item/61ed09222ab3f51d91123700.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><div class="data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a></div><div class="data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div><div class="data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://pic.imgdb.cn/item/621b32262ab3f51d9198ff15.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">droidYu</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">SystemServer 进程启动过程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-02-27T06:27:32.000Z" title="发表于 2022-02-27 14:27:32">2022-02-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-02-27T08:13:32.373Z" title="更新于 2022-02-27 16:13:32">2022-02-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android-Framework/">Android Framework</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">903</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="SystemServer 进程启动过程"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>之前的文章<a href="https://droidyu.github.io/android/framework/system-launch/">《浅析Android系统启动过程》</a>简要讲解了Android系统整体启动过程，今天我们看一下其中一个重要的过程：<code>SystemServer</code>进程是如何启动的。</p>
+<blockquote>
+<p><strong>文中源码基于<a target="_blank" rel="noopener" href="https://github.com/aosp-mirror/platform_frameworks_base/tree/oreo-release"><code>Android 8.0</code></a></strong></p>
+</blockquote>
+<p>上篇文章<a href="https://droidyu.github.io/android/framework/zygote/">《Zygote进程启动过程》</a>提到<code>Zygote</code>启动过程中调用了<code>startSystemServer</code>启动<code>SystemServer</code>进程，我们继续跟进里面的代码看<code>SystemServer</code>进程是如何启动的。</p>
+<p>在<code>startSystemServer</code>中通过<code>fork</code>方式创建了<code>SystemServer</code>进程，并调用<code>handleSystemServerProcess</code>处理<code>SystemServer</code>进程，其代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handleSystemServerProcess</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        ClassLoader cl = <span class="keyword">null</span>;</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">if</span> (systemServerClasspath != <span class="keyword">null</span>)</span> </span>&#123;</span><br><span class="line">            cl = createPathClassLoader(systemServerClasspath, parsedArgs.targetSdkVersion);<span class="comment">//---1---</span></span><br><span class="line"></span><br><span class="line">            Thread.currentThread().setContextClassLoader(cl);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ZygoteInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);---<span class="number">2</span>---</span><br></pre></td></tr></table></figure>
+<p>注释1创建了<code>ClassLoader</code>，用于加载类。注释2调用了<code>ZygoteInit.zygoteInit</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">zygoteInit</span><span class="params">(<span class="keyword">int</span> targetSdkVersion, String[] argv,</span></span></span><br><span class="line"><span class="params"><span class="function">            ClassLoader classLoader)</span> <span class="keyword">throws</span> Zygote.MethodAndArgsCaller </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (RuntimeInit.DEBUG) &#123;</span><br><span class="line">            Slog.d(RuntimeInit.TAG, <span class="string">&quot;RuntimeInit: Starting application from zygote&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, <span class="string">&quot;ZygoteInit&quot;</span>);</span><br><span class="line">        RuntimeInit.redirectLogStreams();</span><br><span class="line"></span><br><span class="line">        RuntimeInit.commonInit();</span><br><span class="line">        ZygoteInit.nativeZygoteInit();<span class="comment">//---1---</span></span><br><span class="line">        RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);<span class="comment">//---2---</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处通过<code>native</code>方法，创建了<code>Binder</code>线程池，用于跨进程通信。注释2处调用<code>RuntimeInit.applicationInit</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">applicationInit</span><span class="params">(<span class="keyword">int</span> targetSdkVersion, String[] argv, ClassLoader classLoader)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> Zygote.MethodAndArgsCaller </span>&#123;</span><br><span class="line"></span><br><span class="line">        VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> Arguments args;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            args = <span class="keyword">new</span> Arguments(argv);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalArgumentException ex) &#123;</span><br><span class="line">            Slog.e(TAG, ex.getMessage());</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</span><br><span class="line"></span><br><span class="line">        invokeStaticMain(args.startClass, args.startArgs, classLoader);<span class="comment">//---1---</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>继续看注释1处<code>invokeStaticMain</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">invokeStaticMain</span><span class="params">(String className, String[] argv, ClassLoader classLoader)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> Zygote.MethodAndArgsCaller </span>&#123;</span><br><span class="line">        Class&lt;?&gt; cl;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            cl = Class.forName(className, <span class="keyword">true</span>, classLoader);<span class="comment">//---1---</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException ex) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                    <span class="string">&quot;Missing class when invoking static main &quot;</span> + className,</span><br><span class="line">                    ex);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Method m;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            m = cl.getMethod(<span class="string">&quot;main&quot;</span>, <span class="keyword">new</span> Class[] &#123; String[].class &#125;);---<span class="number">2</span>---</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException ex) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                    <span class="string">&quot;Missing static main on &quot;</span> + className, ex);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (SecurityException ex) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                    <span class="string">&quot;Problem getting static main on &quot;</span> + className, ex);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> modifiers = m.getModifiers();</span><br><span class="line">        <span class="keyword">if</span> (! (Modifier.isStatic(modifiers) &amp;&amp; Modifier.isPublic(modifiers))) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                    <span class="string">&quot;Main method is not public and static on &quot;</span> + className);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> Zygote.MethodAndArgsCaller(m, argv);---<span class="number">3</span>---</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处通过反射获取传入的<code>className</code>类，从最开始的<code>startSystemServer</code>方法可以知道，这里的<code>className</code>就是<code>args</code>参数中的<code>com.android.server.SystemServer</code>，所以反射得到的类是<code>SystemServer</code>类。注释2处通过反射得到<code>SystemServer</code>的<code>main</code>方法。注释3处将<code>Method</code>和<code>argv</code>作为参数，创建了<code>Zygote.MethodAndArgsCaller</code>并抛出，那抛出的这个<code>Zygote.MethodAndArgsCaller</code>是在哪里<code>catch</code>的？顺着源码返回去看可以知道这个<code>Zygote.MethodAndArgsCaller</code>是在启动<code>Zygote</code>进程时<code>main</code>方法里捕获的，这里只贴了关键代码，具体代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZygoteInit</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String argv[])</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            startSystemServer(abiList, socketName, zygoteServer);</span><br><span class="line">        <span class="keyword">catch</span> (Zygote.MethodAndArgsCaller caller) &#123;</span><br><span class="line">            caller.run();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>catch</code>里执行了<code>caller.run()</code>方法，我们再看<code>Zygote.MethodAndArgsCaller</code>的<code>run</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                mMethod.invoke(<span class="keyword">null</span>, <span class="keyword">new</span> Object[] &#123; mArgs &#125;);<span class="comment">//---1---</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (IllegalAccessException ex) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(ex);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InvocationTargetException ex) &#123;</span><br><span class="line">                Throwable cause = ex.getCause();</span><br><span class="line">                <span class="keyword">if</span> (cause <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> (RuntimeException) cause;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cause <span class="keyword">instanceof</span> Error) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> (Error) cause;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(ex);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>这里只调用了<code>mMethod.invoke</code>，回到之前的代码，其实就是用反射的方式调用了<code>SystemServer</code>的<code>main</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">new</span> SystemServer().run();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再看<code>SystemServer</code>的<code>run</code>方法，由于代码很长，这里只贴关键代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Looper.prepareMainLooper();<span class="comment">//1</span></span><br><span class="line"></span><br><span class="line">    System.loadLibrary(<span class="string">&quot;android_servers&quot;</span>);<span class="comment">//2</span></span><br><span class="line">    createSystemContext();<span class="comment">//3</span></span><br><span class="line">    mSystemServiceManager = <span class="keyword">new</span> SystemServiceManager(mSystemContext);<span class="comment">//4</span></span><br><span class="line">    LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);<span class="comment">//5</span></span><br><span class="line">     </span><br><span class="line">    startBootstrapServices();<span class="comment">//6</span></span><br><span class="line">    startCoreServices();<span class="comment">//7</span></span><br><span class="line">    startOtherServices();<span class="comment">//8</span></span><br><span class="line">    </span><br><span class="line">    Looper.loop();<span class="comment">//9</span></span><br><span class="line">     </span><br></pre></td></tr></table></figure>
+<p>注释1处初始化<code>Looper</code>；注释2加载了<code>android_servers.so</code>库；注释3创建系统<code>Context</code>；注释4创建<code>SystemServiceManager</code>；注释5将<code>SystemServiceManager</code>添加到本地服务；注释6启动引导服务；注释7启动核心服务；注释8启动其他服务；注释9开启Looper循环。</p>
+<blockquote>
+<p><strong>学习更多知识，请关注我的个人博客：<a href="https://droidyu.github.io/">droidYu</a></strong></p>
+</blockquote>
+<blockquote>
+<p><strong>关注我</strong></p>
+<ul>
+<li>掘金：<a target="_blank" rel="noopener" href="https://juejin.cn/user/2365804752143256">droidYu</a></li>
+<li>CSDN：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010444082">droidYu</a></li>
+<li>Github：<a target="_blank" rel="noopener" href="https://github.com/droidYu">droidYu</a></li>
+<li>个人博客：<a href="https://droidyu.github.io/">droidYu</a></li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">droidYu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://droidyu.github.io/android/framework/system-server/">https://droidyu.github.io/android/framework/system-server/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://droidyu.github.io" target="_blank">droidYu</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">Android系统启动</a><a class="post-meta__tags" href="/tags/Android-Framework/">Android Framework</a></div><div class="post_share"><div class="social-share" data-image="https://pic.imgdb.cn/item/621b32262ab3f51d9198ff15.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/android/framework/zygote/"><img class="next-cover" src="https://pic.imgdb.cn/item/621b14c02ab3f51d91549d78.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Zygote进程启动过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/android/framework/system-launch/" title="浅析Android系统启动过程"><img class="cover" src="https://pic.imgdb.cn/item/62038ece2ab3f51d91289816.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-09</div><div class="title">浅析Android系统启动过程</div></div></a></div><div><a href="/android/framework/zygote/" title="Zygote进程启动过程"><img class="cover" src="https://pic.imgdb.cn/item/621b14c02ab3f51d91549d78.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-27</div><div class="title">Zygote进程启动过程</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://pic.imgdb.cn/item/61ed09222ab3f51d91123700.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">droidYu</div><div class="author-info__description">一个有梦想的 Android Coder</div></div><div class="card-info-data is-center"><div class="card-info-data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a></div><div class="card-info-data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a></div><div class="card-info-data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/droidYu"><i class="fab fa-github"></i><span>Github</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">关注我，一起成长为理想的自己</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/android/framework/system-server/" title="SystemServer 进程启动过程"><img src="https://pic.imgdb.cn/item/621b32262ab3f51d9198ff15.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="SystemServer 进程启动过程"/></a><div class="content"><a class="title" href="/android/framework/system-server/" title="SystemServer 进程启动过程">SystemServer 进程启动过程</a><time datetime="2022-02-27T06:27:32.000Z" title="发表于 2022-02-27 14:27:32">2022-02-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/android/framework/zygote/" title="Zygote进程启动过程"><img src="https://pic.imgdb.cn/item/621b14c02ab3f51d91549d78.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Zygote进程启动过程"/></a><div class="content"><a class="title" href="/android/framework/zygote/" title="Zygote进程启动过程">Zygote进程启动过程</a><time datetime="2022-02-27T02:09:43.000Z" title="发表于 2022-02-27 10:09:43">2022-02-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/DesignPattern/factory-method/" title="设计模式（三）工厂方法模式"><img src="https://pic.imgdb.cn/item/6219b34e2ab3f51d919c5fa5.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="设计模式（三）工厂方法模式"/></a><div class="content"><a class="title" href="/DesignPattern/factory-method/" title="设计模式（三）工厂方法模式">设计模式（三）工厂方法模式</a><time datetime="2022-02-21T05:21:09.000Z" title="发表于 2022-02-21 13:21:09">2022-02-21</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/DesignPattern/simple-factory/" title="设计模式（二）简单工厂模式"><img src="https://pic.imgdb.cn/item/6210ea292ab3f51d91ae063b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="设计模式（二）简单工厂模式"/></a><div class="content"><a class="title" href="/DesignPattern/simple-factory/" title="设计模式（二）简单工厂模式">设计模式（二）简单工厂模式</a><time datetime="2022-02-19T11:27:39.000Z" title="发表于 2022-02-19 19:27:39">2022-02-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/Java/annotation-processor-1/" title="Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架"><img src="https://pic.imgdb.cn/item/620f88a82ab3f51d910c551c.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架"/></a><div class="content"><a class="title" href="/Java/annotation-processor-1/" title="Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架">Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架</a><time datetime="2022-02-18T10:45:44.000Z" title="发表于 2022-02-18 18:45:44">2022-02-18</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://pic.imgdb.cn/item/621b32262ab3f51d9198ff15.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By droidYu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">本地搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="34,98,116" opacity="0.7" zIndex="-1" count="199" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
