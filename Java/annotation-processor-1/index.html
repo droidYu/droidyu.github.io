@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架 | droidYu</title><meta name="keywords" content="Java,注解"><meta name="author" content="droidYu"><meta name="copyright" content="droidYu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="上篇文章《Java高级特性（一）注解的分类及使用》讲了注解相关的基础知识，但是基本的注解声明和使用，并不能发挥注解的真正效果。如果要让注解产生实际的作用，就需要搭配注解处理器来使用。至于为什么说写半个Retrofit框架，因为本文只涉及到Retrofit框架中关于注解处理的内容（大佬轻喷）。 我们先回顾一下Retrofit是怎么用的？（代码摘自Retrofit官网） 第一步：定义一个接口，接口里面">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架">
+<meta property="og:url" content="https://droidyu.github.io/Java/annotation-processor-1/index.html">
+<meta property="og:site_name" content="droidYu">
+<meta property="og:description" content="上篇文章《Java高级特性（一）注解的分类及使用》讲了注解相关的基础知识，但是基本的注解声明和使用，并不能发挥注解的真正效果。如果要让注解产生实际的作用，就需要搭配注解处理器来使用。至于为什么说写半个Retrofit框架，因为本文只涉及到Retrofit框架中关于注解处理的内容（大佬轻喷）。 我们先回顾一下Retrofit是怎么用的？（代码摘自Retrofit官网） 第一步：定义一个接口，接口里面">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.imgdb.cn/item/620f88a82ab3f51d910c551c.jpg">
+<meta property="article:published_time" content="2022-02-18T10:45:44.000Z">
+<meta property="article:modified_time" content="2022-02-19T02:49:35.229Z">
+<meta property="article:author" content="droidYu">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="注解">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.imgdb.cn/item/620f88a82ab3f51d910c551c.jpg"><link rel="shortcut icon" href="https://pic.imgdb.cn/item/61ed5e7a2ab3f51d916195d7.png"><link rel="canonical" href="https://droidyu.github.io/Java/annotation-processor-1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2022-02-19 10:49:35'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://pic.imgdb.cn/item/61ed09222ab3f51d91123700.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><div class="data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">31</div></a></div><div class="data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a></div><div class="data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://pic.imgdb.cn/item/620f88a82ab3f51d910c551c.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">droidYu</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-02-18T10:45:44.000Z" title="发表于 2022-02-18 18:45:44">2022-02-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-02-19T02:49:35.229Z" title="更新于 2022-02-19 10:49:35">2022-02-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">881</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Java高级特性（二）注解处理 之 3分钟写半个Retrofit框架"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>上篇文章<a href="https://droidyu.github.io/Java/annotation/">《Java高级特性（一）注解的分类及使用》</a>讲了注解相关的基础知识，但是基本的注解声明和使用，并不能发挥注解的真正效果。如果要让注解产生实际的作用，就需要搭配注解处理器来使用。至于为什么说写半个<code>Retrofit</code>框架，因为本文只涉及到<code>Retrofit</code>框架中关于注解处理的内容（大佬轻喷）。</p>
+<p>我们先回顾一下<code>Retrofit</code>是怎么用的？（代码摘自<a target="_blank" rel="noopener" href="https://square.github.io/retrofit/"><code>Retrofit</code>官网</a>）</p>
+<p>第一步：定义一个接口，接口里面定义方法，使用<code>@GET、@POST</code>等注解标注我们定义的方法；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">GitHubService</span> &#123;</span><br><span class="line">  <span class="meta">@GET(&quot;users/&#123;user&#125;/repos&quot;)</span></span><br><span class="line">  Call&lt;List&lt;Repo&gt;&gt; <span class="title function_">listRepos</span><span class="params">(<span class="meta">@Path(&quot;user&quot;)</span> String user)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第二步：创建<code>retrofit</code>实例，然后调用<code>retrofit.create()</code>方法，将我们定义的接口<code>.class</code>传入<code>create</code>方法。通过<code>create</code>方法生成实现了我们定义的接口的代理对象；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Retrofit</span> <span class="variable">retrofit</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Retrofit</span>.Builder()</span><br><span class="line">    .baseUrl(<span class="string">&quot;https://api.github.com/&quot;</span>)</span><br><span class="line">    .build();</span><br><span class="line"></span><br><span class="line"><span class="type">GitHubService</span> <span class="variable">service</span> <span class="operator">=</span> retrofit.create(GitHubService.class);</span><br></pre></td></tr></table></figure>
+<p>第三步：调用实现了接口的代理对象的具体方法，完成网络请求。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Call&lt;List&lt;Repo&gt;&gt; repos = service.listRepos(<span class="string">&quot;octocat&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>那<code>Retrofit</code>是如何将<code>@GET</code>注解里的接口地址解析出来并使用的呢？这里就用到了注解处理，使用反射的方式获取了方法的注解传入的参数值。下面我们就自己用代码来实现一下。</p>
+<ol>
+<li>定义一个<code>@GET</code>注解和<code>@POST</code>注解：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.METHOD)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> GET &#123;</span><br><span class="line">    String <span class="title function_">value</span><span class="params">()</span> <span class="keyword">default</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.METHOD)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> POST &#123;</span><br><span class="line">    String <span class="title function_">value</span><span class="params">()</span> <span class="keyword">default</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>定义<code>Api</code>抽象类，类比<code>Retrofit</code>的第一步：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">Api</span> &#123;</span><br><span class="line">    <span class="meta">@GET(&quot;https://api.github.com&quot;)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">getGithub</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@POST(&quot;https://api.github.com/droidYu&quot;)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">updateUserInfo</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为<code>Retrofit</code>涉及到动态代理到知识，这里不进行深入讲解，所以我们使用了抽象类来代替<code>Retrofit</code>的接口。</p>
+<ol start="3">
+<li>在<code>main</code>方法中调用<code>getAnnotation()</code>方法，并传入<code>Api.class</code>，这一步可以类比<code>Retrofit</code>框架中第二步<code>retrofit.create(GitHubService.class)</code>方法的调用：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        getAnnotation(Api.class);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>getAnnotation</code>方法中通过反射到方式获取<code>@GET</code>和<code>@POST</code>注解里的请求地址并打印：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">getAnnotation</span><span class="params">(Class clazz)</span> &#123;</span><br><span class="line">    <span class="comment">//获取传入的.class中的所有方法</span></span><br><span class="line">    Method[] methods = clazz.getDeclaredMethods();</span><br><span class="line">    <span class="keyword">for</span> (Method method : methods) &#123;</span><br><span class="line">        <span class="comment">//遍历获取到到方法数组，获取每个方法中的所有注解</span></span><br><span class="line">        Annotation[] annotations = method.getAnnotations();</span><br><span class="line">        <span class="keyword">for</span> (Annotation annotation : annotations) &#123;</span><br><span class="line">            <span class="comment">//遍历获取到的所有注解，判断注解类型，分别打印注解内容</span></span><br><span class="line">            <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> GET) &#123;</span><br><span class="line">                print(<span class="string">&quot;GET&quot;</span>,method,((GET) annotation).value());</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> POST) &#123;</span><br><span class="line">                print(<span class="string">&quot;POST&quot;</span>,method,((POST) annotation).value());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中<code>print</code>方法定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">print</span><span class="params">(String methodType,Method method, String annotationValue)</span> &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;从 &quot;</span>+methodType+<span class="string">&quot; 方法：&quot;</span>+method.getName()+<span class="string">&quot; 获取到注解的值：&quot;</span> + annotationValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行程序：<br><img src="https://pic.imgdb.cn/item/620f86a52ab3f51d910992b3.jpg"></p>
+<p>从打印的内容中，我们可以看到，我们已经成功的从我们自己定义的注解中获取到了请求地址。这其实就是<code>Retrofit</code>框架用注解获取请求地址的的核心设计思路，只不过<code>Retrofit</code>框架的这部分代码更加完善，使得框架非常的简单易用。至此，我们花3分钟的时间，就写了半个<code>Retrofit</code>框架，即<code>Retrofit</code>注解处理的核心代码。</p>
+<p>示例代码已上传<a target="_blank" rel="noopener" href="https://github.com/droidYu/JavaDemo/tree/main/app/src/main/java/com/droidyu/javademo/annotation/processor">Github</a></p>
+<blockquote>
+<p><strong>关注我</strong></p>
+<ul>
+<li>掘金：<a target="_blank" rel="noopener" href="https://juejin.cn/user/2365804752143256">droidYu</a></li>
+<li>CSDN：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010444082">droidYu</a></li>
+<li>Github：<a target="_blank" rel="noopener" href="https://github.com/droidYu">droidYu</a></li>
+<li>个人博客：<a href="https://droidyu.github.io/">droidYu</a></li>
+</ul>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">droidYu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://droidyu.github.io/Java/annotation-processor-1/">https://droidyu.github.io/Java/annotation-processor-1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://droidyu.github.io" target="_blank">droidYu</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/%E6%B3%A8%E8%A7%A3/">注解</a></div><div class="post_share"><div class="social-share" data-image="https://pic.imgdb.cn/item/620f88a82ab3f51d910c551c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/DesignPattern/simple-factory/"><img class="prev-cover" src="https://pic.imgdb.cn/item/6210ea292ab3f51d91ae063b.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">设计模式（二）简单工厂模式</div></div></a></div><div class="next-post pull-right"><a href="/Java/annotation/"><img class="next-cover" src="https://pic.imgdb.cn/item/620f3bc62ab3f51d919e462b.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Java高级特性（一）注解的分类及使用</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/Java/annotation/" title="Java高级特性（一）注解的分类及使用"><img class="cover" src="https://pic.imgdb.cn/item/620f3bc62ab3f51d919e462b.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-18</div><div class="title">Java高级特性（一）注解的分类及使用</div></div></a></div><div><a href="/Java/thread/status-and-create/" title="Java多线程（一）线程状态及线程创建方式"><img class="cover" src="https://pic.imgdb.cn/item/620c92902ab3f51d91d00728.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-16</div><div class="title">Java多线程（一）线程状态及线程创建方式</div></div></a></div><div><a href="/Java/thread/volatile/" title="Java多线程（二）Java内存模型"><img class="cover" src="https://pic.imgdb.cn/item/620e54072ab3f51d917717b4.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-17</div><div class="title">Java多线程（二）Java内存模型</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://pic.imgdb.cn/item/61ed09222ab3f51d91123700.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">droidYu</div><div class="author-info__description">一个有梦想的 Android Coder</div></div><div class="card-info-data is-center"><div class="card-info-data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">31</div></a></div><div class="card-info-data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a></div><div class="card-info-data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/droidYu"><i class="fab fa-github"></i><span>Github</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">关注我，一起成长为理想的自己</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/Flutter/Libs/flutter_redux_1/" title="Flutter | 状态管理 之 flutter_redux (使用篇)"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter | 状态管理 之 flutter_redux (使用篇)"/></a><div class="content"><a class="title" href="/Flutter/Libs/flutter_redux_1/" title="Flutter | 状态管理 之 flutter_redux (使用篇)">Flutter | 状态管理 之 flutter_redux (使用篇)</a><time datetime="2022-04-24T12:16:29.000Z" title="发表于 2022-04-24 20:16:29">2022-04-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/Note/GeekTime/Kotlin/kotlin-note-09/" title="Kotlin笔记 09 - 委托"><img src="https://pic.imgdb.cn/item/6236fe2d5baa1a80ab823164.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kotlin笔记 09 - 委托"/></a><div class="content"><a class="title" href="/Note/GeekTime/Kotlin/kotlin-note-09/" title="Kotlin笔记 09 - 委托">Kotlin笔记 09 - 委托</a><time datetime="2022-03-27T09:43:17.000Z" title="发表于 2022-03-27 17:43:17">2022-03-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/Note/GeekTime/Kotlin/kotlin-note-other/" title="Kotlin笔记（附加）"><img src="https://pic.imgdb.cn/item/6236fe2d5baa1a80ab823164.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kotlin笔记（附加）"/></a><div class="content"><a class="title" href="/Note/GeekTime/Kotlin/kotlin-note-other/" title="Kotlin笔记（附加）">Kotlin笔记（附加）</a><time datetime="2022-03-26T09:01:36.000Z" title="发表于 2022-03-26 17:01:36">2022-03-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/Note/GeekTime/Kotlin/kotlin-note-08/" title="Kotlin笔记 08 - inline"><img src="https://pic.imgdb.cn/item/6236fe2d5baa1a80ab823164.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kotlin笔记 08 - inline"/></a><div class="content"><a class="title" href="/Note/GeekTime/Kotlin/kotlin-note-08/" title="Kotlin笔记 08 - inline">Kotlin笔记 08 - inline</a><time datetime="2022-03-26T07:36:49.000Z" title="发表于 2022-03-26 15:36:49">2022-03-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/Note/GeekTime/Kotlin/kotlin-note-07/" title="Kotlin笔记 07 - 高阶函数"><img src="https://pic.imgdb.cn/item/6236fe2d5baa1a80ab823164.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kotlin笔记 07 - 高阶函数"/></a><div class="content"><a class="title" href="/Note/GeekTime/Kotlin/kotlin-note-07/" title="Kotlin笔记 07 - 高阶函数">Kotlin笔记 07 - 高阶函数</a><time datetime="2022-03-22T12:43:14.000Z" title="发表于 2022-03-22 20:43:14">2022-03-22</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://pic.imgdb.cn/item/620f88a82ab3f51d910c551c.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By droidYu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">本地搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="34,98,116" opacity="0.7" zIndex="-1" count="199" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = false;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
